@@ -15,5 +15,10 @@ pip.parse(
     hub_name = "pypi",
     python_version = "3.11",
     requirements_lock = "//:requirements.txt",
+    pip_data_exclude = [
+        # We need to exclude the MuJoCo-app because its name contains a
+        # white-space, which breaks Bazel.
+        "**/MuJoCo*mjpython*.app/**",
+    ],
 )
 use_repo(pip, "pypi")
