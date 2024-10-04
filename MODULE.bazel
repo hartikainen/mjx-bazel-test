@@ -10,15 +10,29 @@ python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(python_version = "3.11")
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.whl_mods(
+    hub_name = "whl_mods",
+    whl_name = "mujoco",
+    data_exclude_glob = [
+        "site-packages/mujoco/MuJoCo (mjpython).app/**/*",
+    ],
+)
+use_repo(pip, "whl_mods")
 pip.parse(
     download_only = True,
     hub_name = "pypi",
     python_version = "3.11",
     requirements_lock = "//:requirements.txt",
-    pip_data_exclude = [
-        # We need to exclude the MuJoCo-app because its name contains a
-        # white-space, which breaks Bazel.
-        "**/MuJoCo*mjpython*.app/**",
+    whl_modifications = {
+        "@whl_mods//:mujoco.json": "mujoco",
+    }
+)
+pip.override(
+    # file = "@pypi//mujoco:whl",
+    file = "mujoco-3.2.3-cp311-cp311-macosx_11_0_arm64.whl",
+    patches = [
+        "//:mujoco-fix-namespace.patch",
     ],
+    patch_strip = 0,
 )
 use_repo(pip, "pypi")
